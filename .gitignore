@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+.venv/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build / artifacts
+build/
+dist/
+*.egg-info/
+
+# OS
+.DS_Store
+
+# Vertex / pipelines artifacts (nunca versionar)
+pipeline.json
