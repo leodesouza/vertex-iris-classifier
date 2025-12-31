@@ -3,7 +3,7 @@ from kfp.dsl import component, Output, Metrics, ClassificationMetrics
 
 @component(
     base_image="python:3.10-slim",
-    packages_to_install=["scikit-learn", "joblib", "pandas", "google-cloud-storage"]
+    packages_to_install=["scikit-learn", "joblib", "pandas", "google-cloud-storage","fsspec", "gcsfs"]
 )
 def evaluate_model(
     model_gcs_path: str, # Mudamos de Input[Model] para str
@@ -37,7 +37,18 @@ def evaluate_model(
     model = joblib.load(model_local_path)
     
     # 2. Carregar Dados de Teste
-    df = pd.read_csv(test_dataset)
+    test_local_path = "test_data.csv"
+
+    if test_dataset.startswith("gs://"):
+        bucket_name = test_dataset.split("/")[2]
+        blob_path = "/".join(test_dataset.split("/")[3:])
+        
+        client = storage.Client()
+        bucket = client.bucket(bucket_name)
+        blob = bucket.blob(blob_path)
+        blob.download_to_filename(test_local_path)
+
+    df = pd.read_csv(test_local_path)
     X_test = df.drop(columns=['target'])
     y_test = df['target']
     
@@ -49,6 +60,10 @@ def evaluate_model(
     metrics.log_metric("accuracy", acc)
     
     # ... (restante do código de matriz de confusão e ROC igual) ...
+    
+    print("Model path:", model_gcs_path)
+    print("Test dataset path:", test_dataset)
+
     
     output = namedtuple("Outputs", ["accuracy"])
     return output(acc)

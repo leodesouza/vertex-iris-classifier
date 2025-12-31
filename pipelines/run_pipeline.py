@@ -1,7 +1,7 @@
 from kfp import compiler
 from google.cloud import aiplatform
 # Ajustado para refletir sua nova estrutura de pastas
-from pipelines.training_pipeline import iris_pipeline 
+from pipelines.training_pipeline_old_2 import iris_pipeline 
 
 def run():
     # Centralizando as configurações
