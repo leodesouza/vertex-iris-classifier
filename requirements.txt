@@ -1,0 +1,8 @@
+google-cloud-aiplatform>=1.90.0,<2.0.0
+kfp>=2.15.0,<3.0.0
+google-cloud-pipeline-components==2.22.0
+protobuf>=6.31.1,<7.0.0
+pandas>=2.1.0,<3.0.0
+
+
+# pip install -r requirements.txt

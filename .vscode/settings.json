@@ -1,0 +1,15 @@
+{
+    "python.analysis.extraPaths": ["./"],
+    "python.autoComplete.extraPaths": ["./"],
+    "python.analysis.indexing": true,
+    "python.analysis.packageIndexDepths": [
+        {
+            "name": "training",
+            "depth": 2
+        }
+    ],
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportCallIssue": "none",
+        "reportGeneralTypeIssues": "none"
+    }
+}

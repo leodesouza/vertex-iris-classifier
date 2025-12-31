@@ -2,17 +2,46 @@ from kfp import dsl
 from google_cloud_pipeline_components.v1.custom_job import CustomTrainingJobOp
 from google_cloud_pipeline_components.v1.model import ModelUploadOp
 from google_cloud_pipeline_components.v1.endpoint import EndpointCreateOp, ModelDeployOp
-from components.evaluate import evaluate_model
-from components.validade_model_performance import validate_performance_gate
+from pipelines.components.evaluate import evaluate_model
+from components.validate_model_performance import validate_performance_gate
+
+# Definição de constantes para facilitar a manutenção
+PROJECT_ID = "certifiedgpt"
+REGION = "us-central1"
+BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1"
+# O diretório base onde os artefatos serão salvos
+MODEL_GCS_DIR = f"gs://{BUCKET_NAME}/models/toy-iris"
+# Imagem que você buildou com o Dockerfile e train.py atualizados
+TRAIN_IMAGE = f"{REGION}-docker.pkg.dev/{PROJECT_ID}/ml-containers/toy-trainer:latest"
 
 @dsl.pipeline(name="iris-expert-with-gate")
 def iris_pipeline(
-    project: str = "certifiedgpt",
-    region: str = "us-central1",
-    bucket: str = "gs://certifiedgpt-vertex-pipelines-us-central1"
+    project: str = PROJECT_ID,
+    location: str = REGION,
+    base_output_dir: str = MODEL_GCS_DIR
 ):
     # 1. TREINO
-    train_task = CustomTrainingJobOp(...)
+    train_task = CustomTrainingJobOp(
+        project=project,
+        location=location,
+        display_name="toy-train-job",
+        base_output_directory=base_output_dir,
+        worker_pool_specs=[
+            {
+                "machine_spec": {
+                    "machine_type": "n1-standard-4"
+                },
+                "replica_count": 1,
+                "container_spec": {
+                    "image_uri": TRAIN_IMAGE,
+                },
+            }
+        ],
+    )
+    
+    # train_task.set_cpu_limit('4')
+    # train_task.set_memory_limit('16G')
+    # train_task.add_node_selector_constraint('nvidia-tesla-t4')
 
     # 2. AVALIAÇÃO (Gera as métricas visuais e o objeto metrics)
     eval_task = evaluate_model(
@@ -23,7 +52,7 @@ def iris_pipeline(
     # Este step vai falhar o pipeline se a acurácia for baixa
     gate_task = validate_performance_gate(
         project=project,
-        location=region,
+        location=REGION,
         new_metrics=eval_task.outputs["metrics"],
         model_display_name="iris-expert-model"
     )
@@ -34,7 +63,7 @@ def iris_pipeline(
         # O .after(gate_task) garante que só tentamos registrar se a comparação passar
         upload_task = ModelUploadOp(
             project=project,
-            location=region,
+            location=REGION,
             display_name="iris-expert-model",
             unmanaged_container_model=train_task.outputs["model"],
             serving_container_image_uri="us-docker.pkg.dev/vertex-ai/prediction/sklearn-cpu.1-3:latest",
