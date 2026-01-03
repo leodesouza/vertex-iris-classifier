@@ -1,87 +1,5 @@
 {
   "components": {
-    "comp-condition-1": {
-      "dag": {
-        "tasks": {
-          "importer": {
-            "cachingOptions": {
-              "enableCache": true
-            },
-            "componentRef": {
-              "name": "comp-importer"
-            },
-            "inputs": {
-              "parameters": {
-                "pipelinechannel--base_output_dir": {
-                  "componentInputParameter": "pipelinechannel--base_output_dir"
-                },
-                "uri": {
-                  "runtimeValue": {
-                    "constant": "{{$.inputs.parameters['pipelinechannel--base_output_dir']}}/model"
-                  }
-                }
-              }
-            },
-            "taskInfo": {
-              "name": "importer"
-            }
-          },
-          "model-upload": {
-            "cachingOptions": {
-              "enableCache": true
-            },
-            "componentRef": {
-              "name": "comp-model-upload"
-            },
-            "dependentTasks": [
-              "importer"
-            ],
-            "inputs": {
-              "artifacts": {
-                "unmanaged_container_model": {
-                  "taskOutputArtifact": {
-                    "outputArtifactKey": "artifact",
-                    "producerTask": "importer"
-                  }
-                }
-              },
-              "parameters": {
-                "display_name": {
-                  "runtimeValue": {
-                    "constant": "iris-expert-model"
-                  }
-                },
-                "location": {
-                  "componentInputParameter": "pipelinechannel--location"
-                },
-                "project": {
-                  "componentInputParameter": "pipelinechannel--project"
-                }
-              }
-            },
-            "taskInfo": {
-              "name": "model-upload"
-            }
-          }
-        }
-      },
-      "inputDefinitions": {
-        "parameters": {
-          "pipelinechannel--base_output_dir": {
-            "parameterType": "STRING"
-          },
-          "pipelinechannel--evaluate-model-accuracy": {
-            "parameterType": "NUMBER_DOUBLE"
-          },
-          "pipelinechannel--location": {
-            "parameterType": "STRING"
-          },
-          "pipelinechannel--project": {
-            "parameterType": "STRING"
-          }
-        }
-      }
-    },
     "comp-custom-training-job": {
       "executorLabel": "exec-custom-training-job",
       "inputDefinitions": {
@@ -203,40 +121,6 @@
         }
       }
     },
-    "comp-evaluate-model": {
-      "executorLabel": "exec-evaluate-model",
-      "inputDefinitions": {
-        "parameters": {
-          "model_gcs_path": {
-            "parameterType": "STRING"
-          },
-          "test_dataset": {
-            "parameterType": "STRING"
-          }
-        }
-      },
-      "outputDefinitions": {
-        "artifacts": {
-          "classification_metrics": {
-            "artifactType": {
-              "schemaTitle": "system.ClassificationMetrics",
-              "schemaVersion": "0.0.1"
-            }
-          },
-          "metrics": {
-            "artifactType": {
-              "schemaTitle": "system.Metrics",
-              "schemaVersion": "0.0.1"
-            }
-          }
-        },
-        "parameters": {
-          "accuracy": {
-            "parameterType": "NUMBER_DOUBLE"
-          }
-        }
-      }
-    },
     "comp-importer": {
       "executorLabel": "exec-importer",
       "inputDefinitions": {
@@ -250,7 +134,7 @@
         "artifacts": {
           "artifact": {
             "artifactType": {
-              "schemaTitle": "system.Artifact",
+              "schemaTitle": "google.UnmanagedContainerModel",
               "schemaVersion": "0.0.1"
             }
           }
@@ -352,6 +236,7 @@
       }
     }
   },
+  "defaultPipelineRoot": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs",
   "deploymentSpec": {
     "executors": {
       "exec-custom-training-job": {
@@ -377,38 +262,18 @@
           "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:2.22.0"
         }
       },
-      "exec-evaluate-model": {
-        "container": {
-          "args": [
-            "--executor_input",
-            "{{$}}",
-            "--function_to_execute",
-            "evaluate_model"
-          ],
-          "command": [
-            "sh",
-            "-c",
-            "\nif ! [ -x \"$(command -v pip)\" ]; then\n    python3 -m ensurepip || python3 -m ensurepip --user || apt-get install python3-pip\nfi\n\nPIP_DISABLE_PIP_VERSION_CHECK=1 python3 -m pip install --quiet --no-warn-script-location 'kfp==2.6.0' '--no-deps' 'typing-extensions>=3.7.4,<5; python_version<\"3.9\"'  &&  python3 -m pip install --quiet --no-warn-script-location 'scikit-learn' 'joblib' 'pandas' 'google-cloud-storage' 'fsspec' 'gcsfs' && \"$0\" \"$@\"\n",
-            "sh",
-            "-ec",
-            "program_path=$(mktemp -d)\n\nprintf \"%s\" \"$0\" > \"$program_path/ephemeral_component.py\"\n_KFP_RUNTIME=true python3 -m kfp.dsl.executor_main                         --component_module_path                         \"$program_path/ephemeral_component.py\"                         \"$@\"\n",
-            "\nimport kfp\nfrom kfp import dsl\nfrom kfp.dsl import *\nfrom typing import *\n\ndef evaluate_model(\n    model_gcs_path: str, # Mudamos de Input[Model] para str\n    test_dataset: str,\n    metrics: Output[Metrics],\n    classification_metrics: Output[ClassificationMetrics]\n) -> NamedTuple(\"Outputs\", [(\"accuracy\", float)]):\n    import joblib\n    import pandas as pd\n    import os\n    from sklearn.metrics import accuracy_score, confusion_matrix, roc_curve\n    from collections import namedtuple\n    from google.cloud import storage\n\n    # 1. Download do modelo do GCS para o container local\n    # Como n\u00e3o estamos usando Input[Model], baixamos manualmente\n    model_local_path = \"model.joblib\"\n\n    if model_gcs_path.startswith(\"gs://\"):\n        bucket_name = model_gcs_path.split(\"/\")[2]\n        blob_path = \"/\".join(model_gcs_path.split(\"/\")[3:])\n        # Garante que aponta para o arquivo e n\u00e3o para a pasta\n        if not blob_path.endswith(\".joblib\"):\n             blob_path = os.path.join(blob_path, \"model.joblib\")\n\n        client = storage.Client()\n        bucket = client.bucket(bucket_name)\n        blob = bucket.blob(blob_path)\n        blob.download_to_filename(model_local_path)\n\n    model = joblib.load(model_local_path)\n\n    # 2. Carregar Dados de Teste\n    test_local_path = \"test_data.csv\"\n\n    if test_dataset.startswith(\"gs://\"):\n        bucket_name = test_dataset.split(\"/\")[2]\n        blob_path = \"/\".join(test_dataset.split(\"/\")[3:])\n\n        client = storage.Client()\n        bucket = client.bucket(bucket_name)\n        blob = bucket.blob(blob_path)\n        blob.download_to_filename(test_local_path)\n\n    df = pd.read_csv(test_local_path)\n    X_test = df.drop(columns=['target'])\n    y_test = df['target']\n\n    # 3. Predi\u00e7\u00f5es e M\u00e9tricas\n    predictions = model.predict(X_test)\n    y_scores = model.predict_proba(X_test)[:, 1]\n\n    acc = float(accuracy_score(y_test, predictions))\n    metrics.log_metric(\"accuracy\", acc)\n\n    # ... (restante do c\u00f3digo de matriz de confus\u00e3o e ROC igual) ...\n\n    print(\"Model path:\", model_gcs_path)\n    print(\"Test dataset path:\", test_dataset)\n\n\n    output = namedtuple(\"Outputs\", [\"accuracy\"])\n    return output(acc)\n\n"
-          ],
-          "image": "python:3.10-slim"
-        }
-      },
       "exec-importer": {
         "importer": {
           "artifactUri": {
-            "constant": "{{channel:task=;name=base_output_dir;type=String;}}/model"
+            "runtimeParameter": "uri"
           },
           "metadata": {
             "containerSpec": {
-              "imageUri": "us-docker.pkg.dev/vertex-ai/prediction/sklearn-cpu.1-3:latest"
+              "imageUri": "us-docker.pkg.dev/vertex-ai/prediction/sklearn-cpu.1-0:latest"
             }
           },
           "typeSchema": {
-            "schemaTitle": "system.Artifact",
+            "schemaTitle": "google.UnmanagedContainerModel",
             "schemaVersion": "0.0.1"
           }
         }
@@ -442,64 +307,11 @@
     }
   },
   "pipelineInfo": {
-    "name": "iris-expert-with-gate"
+    "name": "iris-pipeline"
   },
   "root": {
     "dag": {
-      "outputs": {
-        "artifacts": {
-          "evaluate-model-classification_metrics": {
-            "artifactSelectors": [
-              {
-                "outputArtifactKey": "classification_metrics",
-                "producerSubtask": "evaluate-model"
-              }
-            ]
-          },
-          "evaluate-model-metrics": {
-            "artifactSelectors": [
-              {
-                "outputArtifactKey": "metrics",
-                "producerSubtask": "evaluate-model"
-              }
-            ]
-          }
-        }
-      },
       "tasks": {
-        "condition-1": {
-          "componentRef": {
-            "name": "comp-condition-1"
-          },
-          "dependentTasks": [
-            "evaluate-model"
-          ],
-          "inputs": {
-            "parameters": {
-              "pipelinechannel--base_output_dir": {
-                "componentInputParameter": "base_output_dir"
-              },
-              "pipelinechannel--evaluate-model-accuracy": {
-                "taskOutputParameter": {
-                  "outputParameterKey": "accuracy",
-                  "producerTask": "evaluate-model"
-                }
-              },
-              "pipelinechannel--location": {
-                "componentInputParameter": "location"
-              },
-              "pipelinechannel--project": {
-                "componentInputParameter": "project"
-              }
-            }
-          },
-          "taskInfo": {
-            "name": "min-threshold-check"
-          },
-          "triggerPolicy": {
-            "condition": "inputs.parameter_values['pipelinechannel--evaluate-model-accuracy'] >= 0.9"
-          }
-        },
         "custom-training-job": {
           "cachingOptions": {
             "enableCache": true
@@ -510,11 +322,13 @@
           "inputs": {
             "parameters": {
               "base_output_directory": {
-                "componentInputParameter": "base_output_dir"
+                "runtimeValue": {
+                  "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs"
+                }
               },
               "display_name": {
                 "runtimeValue": {
-                  "constant": "train-job"
+                  "constant": "iris-train"
                 }
               },
               "location": {
@@ -544,35 +358,62 @@
             "name": "custom-training-job"
           }
         },
-        "evaluate-model": {
+        "importer": {
           "cachingOptions": {
             "enableCache": true
           },
           "componentRef": {
-            "name": "comp-evaluate-model"
+            "name": "comp-importer"
           },
           "dependentTasks": [
             "custom-training-job"
           ],
           "inputs": {
             "parameters": {
-              "model_gcs_path": {
-                "runtimeValue": {
-                  "constant": "{{$.inputs.parameters['pipelinechannel--base_output_dir']}}/model"
-                }
-              },
-              "pipelinechannel--base_output_dir": {
+              "uri": {
                 "componentInputParameter": "base_output_dir"
-              },
-              "test_dataset": {
-                "runtimeValue": {
-                  "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/models/iris-model/artifacts/test_data.csv"
-                }
               }
             }
           },
           "taskInfo": {
-            "name": "evaluate-model"
+            "name": "importer"
+          }
+        },
+        "model-upload": {
+          "cachingOptions": {
+            "enableCache": true
+          },
+          "componentRef": {
+            "name": "comp-model-upload"
+          },
+          "dependentTasks": [
+            "importer"
+          ],
+          "inputs": {
+            "artifacts": {
+              "unmanaged_container_model": {
+                "taskOutputArtifact": {
+                  "outputArtifactKey": "artifact",
+                  "producerTask": "importer"
+                }
+              }
+            },
+            "parameters": {
+              "display_name": {
+                "runtimeValue": {
+                  "constant": "iris-expert-model"
+                }
+              },
+              "location": {
+                "componentInputParameter": "location"
+              },
+              "project": {
+                "componentInputParameter": "project"
+              }
+            }
+          },
+          "taskInfo": {
+            "name": "model-upload"
           }
         }
       }
@@ -580,7 +421,7 @@
     "inputDefinitions": {
       "parameters": {
         "base_output_dir": {
-          "defaultValue": "gs://certifiedgpt-vertex-pipelines-us-central1/models/iris-model",
+          "defaultValue": "gs://certifiedgpt-vertex-pipelines-us-central1",
           "isOptional": true,
           "parameterType": "STRING"
         },
@@ -593,22 +434,6 @@
           "defaultValue": "certifiedgpt",
           "isOptional": true,
           "parameterType": "STRING"
-        }
-      }
-    },
-    "outputDefinitions": {
-      "artifacts": {
-        "evaluate-model-classification_metrics": {
-          "artifactType": {
-            "schemaTitle": "system.ClassificationMetrics",
-            "schemaVersion": "0.0.1"
-          }
-        },
-        "evaluate-model-metrics": {
-          "artifactType": {
-            "schemaTitle": "system.Metrics",
-            "schemaVersion": "0.0.1"
-          }
         }
       }
     }

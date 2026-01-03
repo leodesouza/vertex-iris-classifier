@@ -1,14 +1,19 @@
 from kfp import compiler
 from google.cloud import aiplatform
 # Ajustado para refletir sua nova estrutura de pastas
-from pipelines.training_pipeline_old_2 import iris_pipeline 
+from pipelines.training_pipeline import iris_pipeline 
+from datetime import datetime
+
+def get_timestamp():
+    return datetime.now().strftime("%Y%m%d%H%M%S")
 
 def run():
     # Centralizando as configurações
     PROJECT_ID = "certifiedgpt"
     REGION = "us-central1"
-    BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1"
-    PIPELINE_ROOT = f"gs://{BUCKET_NAME}/pipeline_root"
+    BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1" # poderia ser ml-dev-bucket, ml-stagin-bucket ml-prod-bucket
+    MODEL_GCS_DIR = f"gs://{BUCKET_NAME}"
+    PIPELINE_RUNS = f"{MODEL_GCS_DIR}/pipelines/iris/runs"  
 
     aiplatform.init(project=PROJECT_ID, location=REGION)
 
@@ -24,13 +29,13 @@ def run():
     job = aiplatform.PipelineJob(
         display_name="expert-iris-run",
         template_path=package_path,
-        pipeline_root=PIPELINE_ROOT,
-        parameter_values={
+        pipeline_root=PIPELINE_RUNS,
+        parameter_values={            
             "project": PROJECT_ID,
             "location": REGION,
-            "base_output_dir": f"gs://{BUCKET_NAME}/models/iris-model"
+            "base_output_dir": PIPELINE_RUNS
         },
-        enable_caching=True # Mantém o cache para economizar tempo/dinheiro em steps que não mudaram
+        enable_caching=False  # Mantém o cache para economizar tempo/dinheiro em steps que não mudaram
     )
 
     # submit() envia para a nuvem; submit(service_account=...) seria o ideal para produção
