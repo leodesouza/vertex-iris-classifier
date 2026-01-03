@@ -33,7 +33,8 @@ def run():
         parameter_values={            
             "project": PROJECT_ID,
             "location": REGION,
-            "base_output_dir": PIPELINE_RUNS
+            "base_output_dir": PIPELINE_RUNS,
+            "existing_model": False
         },
         enable_caching=False  # Mantém o cache para economizar tempo/dinheiro em steps que não mudaram
     )

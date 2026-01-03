@@ -1,5 +1,312 @@
 {
   "components": {
+    "comp-condition-3": {
+      "dag": {
+        "outputs": {
+          "artifacts": {
+            "pipelinechannel--model-upload-model": {
+              "artifactSelectors": [
+                {
+                  "outputArtifactKey": "model",
+                  "producerSubtask": "model-upload"
+                }
+              ]
+            }
+          }
+        },
+        "tasks": {
+          "importer-2": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-importer-2"
+            },
+            "inputs": {
+              "parameters": {
+                "uri": {
+                  "componentInputParameter": "pipelinechannel--base_output_dir"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "importer-2"
+            }
+          },
+          "model-upload": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-model-upload"
+            },
+            "dependentTasks": [
+              "importer-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "parent_model": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer-2"
+                  }
+                },
+                "unmanaged_container_model": {
+                  "componentInputArtifact": "pipelinechannel--importer-artifact"
+                }
+              },
+              "parameters": {
+                "display_name": {
+                  "runtimeValue": {
+                    "constant": "model_display_name"
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "model-upload"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "artifacts": {
+          "pipelinechannel--importer-artifact": {
+            "artifactType": {
+              "schemaTitle": "google.UnmanagedContainerModel",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        },
+        "parameters": {
+          "pipelinechannel--base_output_dir": {
+            "parameterType": "STRING"
+          },
+          "pipelinechannel--existing_model": {
+            "parameterType": "BOOLEAN"
+          },
+          "pipelinechannel--location": {
+            "parameterType": "STRING"
+          },
+          "pipelinechannel--project": {
+            "parameterType": "STRING"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "pipelinechannel--model-upload-model": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        }
+      }
+    },
+    "comp-condition-4": {
+      "dag": {
+        "outputs": {
+          "artifacts": {
+            "pipelinechannel--model-upload-2-model": {
+              "artifactSelectors": [
+                {
+                  "outputArtifactKey": "model",
+                  "producerSubtask": "model-upload-2"
+                }
+              ]
+            }
+          }
+        },
+        "tasks": {
+          "model-upload-2": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-model-upload-2"
+            },
+            "inputs": {
+              "artifacts": {
+                "unmanaged_container_model": {
+                  "componentInputArtifact": "pipelinechannel--importer-artifact"
+                }
+              },
+              "parameters": {
+                "display_name": {
+                  "runtimeValue": {
+                    "constant": "iris-expert-model"
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "model-upload-2"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "artifacts": {
+          "pipelinechannel--importer-artifact": {
+            "artifactType": {
+              "schemaTitle": "google.UnmanagedContainerModel",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        },
+        "parameters": {
+          "pipelinechannel--existing_model": {
+            "parameterType": "BOOLEAN"
+          },
+          "pipelinechannel--location": {
+            "parameterType": "STRING"
+          },
+          "pipelinechannel--project": {
+            "parameterType": "STRING"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "pipelinechannel--model-upload-2-model": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        }
+      }
+    },
+    "comp-condition-branches-2": {
+      "dag": {
+        "outputs": {
+          "artifacts": {
+            "pipelinechannel--condition-branches-2-oneof-1": {
+              "artifactSelectors": [
+                {
+                  "outputArtifactKey": "pipelinechannel--model-upload-model",
+                  "producerSubtask": "condition-3"
+                },
+                {
+                  "outputArtifactKey": "pipelinechannel--model-upload-2-model",
+                  "producerSubtask": "condition-4"
+                }
+              ]
+            }
+          }
+        },
+        "tasks": {
+          "condition-3": {
+            "componentRef": {
+              "name": "comp-condition-3"
+            },
+            "inputs": {
+              "artifacts": {
+                "pipelinechannel--importer-artifact": {
+                  "componentInputArtifact": "pipelinechannel--importer-artifact"
+                }
+              },
+              "parameters": {
+                "pipelinechannel--base_output_dir": {
+                  "componentInputParameter": "pipelinechannel--base_output_dir"
+                },
+                "pipelinechannel--existing_model": {
+                  "componentInputParameter": "pipelinechannel--existing_model"
+                },
+                "pipelinechannel--location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "pipelinechannel--project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "condition-3"
+            },
+            "triggerPolicy": {
+              "condition": "inputs.parameter_values['pipelinechannel--existing_model'] == true"
+            }
+          },
+          "condition-4": {
+            "componentRef": {
+              "name": "comp-condition-4"
+            },
+            "inputs": {
+              "artifacts": {
+                "pipelinechannel--importer-artifact": {
+                  "componentInputArtifact": "pipelinechannel--importer-artifact"
+                }
+              },
+              "parameters": {
+                "pipelinechannel--existing_model": {
+                  "componentInputParameter": "pipelinechannel--existing_model"
+                },
+                "pipelinechannel--location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "pipelinechannel--project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "condition-4"
+            },
+            "triggerPolicy": {
+              "condition": "!(inputs.parameter_values['pipelinechannel--existing_model'] == true)"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "artifacts": {
+          "pipelinechannel--importer-artifact": {
+            "artifactType": {
+              "schemaTitle": "google.UnmanagedContainerModel",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        },
+        "parameters": {
+          "pipelinechannel--base_output_dir": {
+            "parameterType": "STRING"
+          },
+          "pipelinechannel--existing_model": {
+            "parameterType": "BOOLEAN"
+          },
+          "pipelinechannel--location": {
+            "parameterType": "STRING"
+          },
+          "pipelinechannel--project": {
+            "parameterType": "STRING"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "pipelinechannel--condition-branches-2-oneof-1": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        }
+      }
+    },
     "comp-custom-training-job": {
       "executorLabel": "exec-custom-training-job",
       "inputDefinitions": {
@@ -121,6 +428,248 @@
         }
       }
     },
+    "comp-exit-handler-1": {
+      "dag": {
+        "tasks": {
+          "condition-branches-2": {
+            "componentRef": {
+              "name": "comp-condition-branches-2"
+            },
+            "dependentTasks": [
+              "importer"
+            ],
+            "inputs": {
+              "artifacts": {
+                "pipelinechannel--importer-artifact": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "artifact",
+                    "producerTask": "importer"
+                  }
+                }
+              },
+              "parameters": {
+                "pipelinechannel--base_output_dir": {
+                  "componentInputParameter": "pipelinechannel--base_output_dir"
+                },
+                "pipelinechannel--existing_model": {
+                  "componentInputParameter": "pipelinechannel--existing_model"
+                },
+                "pipelinechannel--location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "pipelinechannel--project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "condition-branches-2"
+            }
+          },
+          "custom-training-job": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-custom-training-job"
+            },
+            "inputs": {
+              "parameters": {
+                "base_output_directory": {
+                  "runtimeValue": {
+                    "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs"
+                  }
+                },
+                "display_name": {
+                  "runtimeValue": {
+                    "constant": "iris-train"
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                },
+                "worker_pool_specs": {
+                  "runtimeValue": {
+                    "constant": [
+                      {
+                        "container_spec": {
+                          "image_uri": "us-central1-docker.pkg.dev/certifiedgpt/ml-containers/vertex-iris-expert-pipeline:latest"
+                        },
+                        "machine_spec": {
+                          "machine_type": "n1-standard-4"
+                        },
+                        "replica_count": 1.0
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "custom-training-job"
+            }
+          },
+          "importer": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-importer"
+            },
+            "dependentTasks": [
+              "custom-training-job"
+            ],
+            "inputs": {
+              "parameters": {
+                "uri": {
+                  "componentInputParameter": "pipelinechannel--base_output_dir"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "importer"
+            }
+          },
+          "model-batch-predict": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-model-batch-predict"
+            },
+            "dependentTasks": [
+              "condition-branches-2"
+            ],
+            "inputs": {
+              "artifacts": {
+                "model": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "pipelinechannel--condition-branches-2-oneof-1",
+                    "producerTask": "condition-branches-2"
+                  }
+                }
+              },
+              "parameters": {
+                "gcs_destination_output_uri_prefix": {
+                  "runtimeValue": {
+                    "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/batch_predict_output"
+                  }
+                },
+                "gcs_source_uris": {
+                  "runtimeValue": {
+                    "constant": [
+                      "gs://certifiedgpt-vertex-pipelines-us-central1/test_no_target.csv"
+                    ]
+                  }
+                },
+                "instances_format": {
+                  "runtimeValue": {
+                    "constant": "csv"
+                  }
+                },
+                "job_display_name": {
+                  "runtimeValue": {
+                    "constant": "prediction-batch-job"
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "machine_type": {
+                  "runtimeValue": {
+                    "constant": "n1-standard-4"
+                  }
+                },
+                "predictions_format": {
+                  "runtimeValue": {
+                    "constant": "jsonl"
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "model-batch-predict"
+            }
+          },
+          "model-evaluation-regression": {
+            "cachingOptions": {
+              "enableCache": true
+            },
+            "componentRef": {
+              "name": "comp-model-evaluation-regression"
+            },
+            "dependentTasks": [
+              "model-batch-predict"
+            ],
+            "inputs": {
+              "artifacts": {
+                "predictions_gcs_source": {
+                  "taskOutputArtifact": {
+                    "outputArtifactKey": "gcs_output_directory",
+                    "producerTask": "model-batch-predict"
+                  }
+                }
+              },
+              "parameters": {
+                "ground_truth_format": {
+                  "runtimeValue": {
+                    "constant": "csv"
+                  }
+                },
+                "ground_truth_gcs_source": {
+                  "runtimeValue": {
+                    "constant": [
+                      "gs://certifiedgpt-vertex-pipelines-us-central1/test.csv"
+                    ]
+                  }
+                },
+                "location": {
+                  "componentInputParameter": "pipelinechannel--location"
+                },
+                "predictions_format": {
+                  "runtimeValue": {
+                    "constant": "jsonl"
+                  }
+                },
+                "project": {
+                  "componentInputParameter": "pipelinechannel--project"
+                },
+                "target_field_name": {
+                  "runtimeValue": {
+                    "constant": "fare"
+                  }
+                }
+              }
+            },
+            "taskInfo": {
+              "name": "model-evaluation-regression"
+            }
+          }
+        }
+      },
+      "inputDefinitions": {
+        "parameters": {
+          "pipelinechannel--base_output_dir": {
+            "parameterType": "STRING"
+          },
+          "pipelinechannel--existing_model": {
+            "parameterType": "BOOLEAN"
+          },
+          "pipelinechannel--location": {
+            "parameterType": "STRING"
+          },
+          "pipelinechannel--project": {
+            "parameterType": "STRING"
+          }
+        }
+      }
+    },
     "comp-importer": {
       "executorLabel": "exec-importer",
       "inputDefinitions": {
@@ -137,6 +686,386 @@
               "schemaTitle": "google.UnmanagedContainerModel",
               "schemaVersion": "0.0.1"
             }
+          }
+        }
+      }
+    },
+    "comp-importer-2": {
+      "executorLabel": "exec-importer-2",
+      "inputDefinitions": {
+        "parameters": {
+          "uri": {
+            "parameterType": "STRING"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "artifact": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            }
+          }
+        }
+      }
+    },
+    "comp-model-batch-predict": {
+      "executorLabel": "exec-model-batch-predict",
+      "inputDefinitions": {
+        "artifacts": {
+          "model": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "The Model used to get predictions via this job. Must share the same ancestor Location. Starting this job has no impact on any existing deployments of the Model and their resources. Either this or `unmanaged_container_model` must be specified.",
+            "isOptional": true
+          },
+          "unmanaged_container_model": {
+            "artifactType": {
+              "schemaTitle": "google.UnmanagedContainerModel",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "The unmanaged container model used to get predictions via this job. This should be used for models that are not uploaded to Vertex. Either this or model must be specified.",
+            "isOptional": true
+          }
+        },
+        "parameters": {
+          "accelerator_count": {
+            "defaultValue": 0.0,
+            "description": "The number of accelerators to attach to the `machine_type`. Only used if `machine_type` is set.  For more details about the machine spec, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec",
+            "isOptional": true,
+            "parameterType": "NUMBER_INTEGER"
+          },
+          "accelerator_type": {
+            "defaultValue": "",
+            "description": "The type of accelerator(s) that may be attached to the machine as per `accelerator_count`. Only used if `machine_type` is set.  For more details about the machine spec, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "bigquery_destination_output_uri": {
+            "defaultValue": "",
+            "description": "The BigQuery project location where the output is to be written to. In the given project a new dataset is created with name `prediction_<model-display-name>_<job-create-time>` where is made BigQuery-dataset-name compatible (for example, most special characters become underscores), and timestamp is in YYYY_MM_DDThh_mm_ss_sssZ \"based on ISO-8601\" format. In the dataset two tables will be created, `predictions`, and `errors`. If the Model has both `instance` and `prediction` schemata defined then the tables have columns as follows: The `predictions` table contains instances for which the prediction succeeded, it has columns as per a concatenation of the Model's instance and prediction schemata. The `errors` table contains rows for which the prediction has failed, it has instance columns, as per the instance schema, followed by a single \"errors\" column, which as values has [google.rpc.Status](Status) represented as a STRUCT, and containing only `code` and `message`. For more details about this output config, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#OutputConfig.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "bigquery_source_input_uri": {
+            "defaultValue": "",
+            "description": "BigQuery URI to a table, up to 2000 characters long. For example: `projectId.bqDatasetId.bqTableId`  For more details about this input config, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#InputConfig.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "encryption_spec_key_name": {
+            "defaultValue": "",
+            "description": "Customer-managed encryption key options for a BatchPredictionJob. If this is set, then all resources created by the BatchPredictionJob will be encrypted with the provided encryption key.  Has the form: `projects/my-project/locations/my-location/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "excluded_fields": {
+            "defaultValue": [],
+            "description": "Fields that will be excluded in the prediction instance that is sent to the Model. Excluded will be attached to the batch prediction output if key_field is not specified. When `excluded_fields` is populated, `included_fields` must be empty. The input must be JSONL with objects at each line, CSV, BigQuery or TfRecord. may be specified via the Model's `parameters_schema_uri`.",
+            "isOptional": true,
+            "parameterType": "LIST"
+          },
+          "explanation_metadata": {
+            "defaultValue": {},
+            "description": "Explanation metadata configuration for this BatchPredictionJob. Can be specified only if `generate_explanation` is set to `True`.  This value overrides the value of `Model.explanation_metadata`. All fields of `explanation_metadata` are optional in the request. If a field of the `explanation_metadata` object is not populated, the corresponding field of the `Model.explanation_metadata` object is inherited.  For more details, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/ExplanationSpec#explanationmetadata.",
+            "isOptional": true,
+            "parameterType": "STRUCT"
+          },
+          "explanation_parameters": {
+            "defaultValue": {},
+            "description": "Parameters to configure explaining for Model's predictions. Can be specified only if `generate_explanation` is set to `True`.  This value overrides the value of `Model.explanation_parameters`. All fields of `explanation_parameters` are optional in the request. If a field of the `explanation_parameters` object is not populated, the corresponding field of the `Model.explanation_parameters` object is inherited.  For more details, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/ExplanationSpec#ExplanationParameters.",
+            "isOptional": true,
+            "parameterType": "STRUCT"
+          },
+          "gcs_destination_output_uri_prefix": {
+            "defaultValue": "",
+            "description": "The Google Cloud Storage location of the directory where the output is to be written to. In the given directory a new directory is created. Its name is `prediction-<model-display-name>-<job-create-time>`, where timestamp is in YYYY-MM-DDThh:mm:ss.sssZ ISO-8601 format. Inside of it files `predictions_0001.<extension>`, `predictions_0002.<extension>`, ..., `predictions_N.<extension>` are created where `<extension>` depends on chosen `predictions_format`, and N may equal 0001 and depends on the total number of successfully predicted instances. If the Model has both `instance` and `prediction` schemata defined then each such file contains predictions as per the `predictions_format`. If prediction for any instance failed (partially or completely), then an additional `errors_0001.<extension>`, `errors_0002.<extension>`,..., `errors_N.<extension>` files are created (N depends on total number of failed predictions). These files contain the failed instances, as per their schema, followed by an additional `error` field which as value has `google.rpc.Status` containing only `code` and `message` fields.  For more details about this output config, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#OutputConfig.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "gcs_source_uris": {
+            "defaultValue": [],
+            "description": "Google Cloud Storage URI(-s) to your instances to run batch prediction on. They must match `instances_format`. May contain wildcards. For more information on wildcards, see [WildcardNames](https://cloud.google.com/storage/docs/gsutil/addlhelp/WildcardNames). For more details about this input config, see [InputConfig](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#InputConfig).",
+            "isOptional": true,
+            "parameterType": "LIST"
+          },
+          "generate_explanation": {
+            "defaultValue": false,
+            "description": "Generate explanation along with the batch prediction results. This will cause the batch prediction output to include explanations based on the `prediction_format`: - `bigquery`: output includes a column named `explanation`. The value is a struct that conforms to the [aiplatform.gapic.Explanation] object. - `jsonl`: The JSON objects on each line include an additional entry keyed `explanation`. The value of the entry is a JSON object that conforms to the [aiplatform.gapic.Explanation] object. - `csv`: Generating explanations for CSV format is not supported.  If this field is set to true, either the Model.explanation_spec or explanation_metadata and explanation_parameters must be populated.",
+            "isOptional": true,
+            "parameterType": "BOOLEAN"
+          },
+          "included_fields": {
+            "defaultValue": [],
+            "description": "Fields that will be included in the prediction instance that is sent to the Model. If `instance_type` is `array`, the order of field names in `included_fields` also determines the order of the values in the array. When `included_fields` is populated, `excluded_fields` must be empty. The input must be JSONL with objects at each line, CSV, BigQuery or TfRecord.",
+            "isOptional": true,
+            "parameterType": "LIST"
+          },
+          "instance_type": {
+            "defaultValue": "",
+            "description": "The format of the instance that the Model accepts. Vertex AI will convert compatible [InstancesFormat](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#InputConfig) to the specified format. Supported values are: `object`: Each input is converted to JSON object format. * For `bigquery`, each row is converted to an object. * For `jsonl`, each line of the JSONL input must be an object. * Does not apply to `csv`, `file-list`, `tf-record`, or `tf-record-gzip`. `array`: Each input is converted to JSON array format. * For `bigquery`, each row is converted to an array. The order of columns is determined by the BigQuery column order, unless [included_fields](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#InputConfig) is populated. `included_fields` must be populated for specifying field orders. * For `jsonl`, if each line of the JSONL input is an object, `included_fields` must be populated for specifying field orders. * Does not apply to `csv`, `file-list`, `tf-record`, or `tf-record-gzip`. If not specified, Vertex AI converts the batch prediction input as follows: * For `bigquery` and `csv`, the behavior is the same as `array`. The order of columns is the same as defined in the file or table, unless included_fields is populated. * For `jsonl`, the prediction instance format is determined by each line of the input. * For `tf-record`/`tf-record-gzip`, each record will be converted to an object in the format of `{\"b64\": <value>}`, where `<value>` is the Base64-encoded string of the content of the record. * For `file-list`, each file in the list will be converted to an object in the format of `{\"b64\": <value>}`, where `<value>` is the Base64-encoded string of the content of the file.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "instances_format": {
+            "defaultValue": "jsonl",
+            "description": "The format in which instances are given, must be one of the [Model](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models)'s supportedInputStorageFormats. For more details about this input config, see [InputConfig](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#InputConfig.)",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "job_display_name": {
+            "description": "The user-defined name of this BatchPredictionJob.",
+            "parameterType": "STRING"
+          },
+          "key_field": {
+            "defaultValue": "",
+            "description": "The name of the field that is considered as a key. The values identified by the key field is not included in the transformed instances that is sent to the Model. This is similar to specifying this name of the field in [excluded_fields](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#InputConfig). In addition, the batch prediction output will not include the instances. Instead the output will only include the value of the key field, in a field named `key` in the output: * For `jsonl` output format, the output will have a `key` field instead of the `instance` field. * For `csv`/`bigquery` output format, the output will have have a `key` column instead of the instance feature columns. The input must be JSONL with objects at each line, CSV, BigQuery or TfRecord.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "labels": {
+            "defaultValue": {},
+            "description": "The labels with user-defined metadata to organize your BatchPredictionJobs.  Label keys and values can be no longer than 64 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed.  See https://goo.gl/xmQnxf for more information and examples of labels.",
+            "isOptional": true,
+            "parameterType": "STRUCT"
+          },
+          "location": {
+            "defaultValue": "us-central1",
+            "description": "Location for creating the BatchPredictionJob.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "machine_type": {
+            "defaultValue": "",
+            "description": "The type of machine for running batch prediction on dedicated resources. If the Model supports DEDICATED_RESOURCES this config may be provided (and the job will use these resources). If the Model doesn't support AUTOMATIC_RESOURCES, this config must be provided.  For more details about the BatchDedicatedResources, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#BatchDedicatedResources. For more details about the machine spec, see https://cloud.google.com/vertex-ai/docs/reference/rest/v1/MachineSpec",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "manual_batch_tuning_parameters_batch_size": {
+            "defaultValue": 0.0,
+            "description": "The number of the records (e.g. instances) of the operation given in each batch to a machine replica. Machine type, and size of a single record should be considered when setting this parameter, higher value speeds up the batch operation's execution, but too high value will result in a whole batch not fitting in a machine's memory, and the whole operation will fail.",
+            "isOptional": true,
+            "parameterType": "NUMBER_INTEGER"
+          },
+          "max_replica_count": {
+            "defaultValue": 0.0,
+            "description": "The maximum number of machine replicas the batch operation may be scaled to. Only used if `machine_type` is set.",
+            "isOptional": true,
+            "parameterType": "NUMBER_INTEGER"
+          },
+          "model_parameters": {
+            "defaultValue": {},
+            "description": "The parameters that govern the predictions. The schema of the parameters",
+            "isOptional": true,
+            "parameterType": "STRUCT"
+          },
+          "predictions_format": {
+            "defaultValue": "jsonl",
+            "description": "The format in which Vertex AI gives the predictions. Must be one of the Model's supportedOutputStorageFormats. For more details about this output config, see [OutputConfig](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.batchPredictionJobs#OutputConfig).",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "project": {
+            "defaultValue": "{{$.pipeline_google_cloud_project_id}}",
+            "description": "Project to create the BatchPredictionJob. Defaults to the project in which the PipelineJob is run.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "service_account": {
+            "defaultValue": "",
+            "description": "The service account that the DeployedModel's container runs as. If not specified, a system generated one will be used, which has minimal permissions and the custom container, if used, may not have enough permission to access other Google Cloud resources. Users deploying the Model must have the iam.serviceAccounts.actAs permission on this service account.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "starting_replica_count": {
+            "defaultValue": 0.0,
+            "description": "The number of machine replicas used at the start of the batch operation. If not set, Vertex AI decides starting number, not greater than `max_replica_count`. Only used if `machine_type` is set.",
+            "isOptional": true,
+            "parameterType": "NUMBER_INTEGER"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "batchpredictionjob": {
+            "artifactType": {
+              "schemaTitle": "google.VertexBatchPredictionJob",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "[**Deprecated. Use gcs_output_directory and bigquery_output_table instead.**] Artifact representation of the created batch prediction job."
+          },
+          "bigquery_output_table": {
+            "artifactType": {
+              "schemaTitle": "google.BQTable",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "Artifact tracking the batch prediction job output. This is only available if bigquery_output_table is specified."
+          },
+          "gcs_output_directory": {
+            "artifactType": {
+              "schemaTitle": "system.Artifact",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "Artifact tracking the batch prediction job output. This is only available if gcs_destination_output_uri_prefix is specified."
+          }
+        },
+        "parameters": {
+          "gcp_resources": {
+            "description": "Serialized gcp_resources proto tracking the batch prediction job. For more details, see https://github.com/kubeflow/pipelines/blob/master/components/google-cloud/google_cloud_pipeline_components/proto/README.md.",
+            "parameterType": "STRING"
+          }
+        }
+      }
+    },
+    "comp-model-evaluation-regression": {
+      "executorLabel": "exec-model-evaluation-regression",
+      "inputDefinitions": {
+        "artifacts": {
+          "model": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "The Vertex model used for evaluation. Must be located in the same region as the location argument. It is used to set the default configurations for AutoML and custom-trained models.",
+            "isOptional": true
+          },
+          "predictions_bigquery_source": {
+            "artifactType": {
+              "schemaTitle": "google.BQTable",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "BigQuery table with prediction or explanation data to be used for this evaluation. For prediction results, the table column should be named \"predicted_*\".",
+            "isOptional": true
+          },
+          "predictions_gcs_source": {
+            "artifactType": {
+              "schemaTitle": "system.Artifact",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "An artifact with its URI pointing toward a GCS directory with prediction or explanation files to be used for this evaluation. For prediction results, the files should be named \"prediction.results-*\". For explanation results, the files should be named \"explanation.results-*\".",
+            "isOptional": true
+          }
+        },
+        "parameters": {
+          "dataflow_disk_size_gb": {
+            "defaultValue": 50.0,
+            "description": "The disk size (in GB) of the machine executing the evaluation run.",
+            "isOptional": true,
+            "parameterType": "NUMBER_INTEGER"
+          },
+          "dataflow_machine_type": {
+            "defaultValue": "n1-standard-4",
+            "description": "The machine type executing the evaluation run.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "dataflow_max_workers_num": {
+            "defaultValue": 5.0,
+            "description": "The max number of workers executing the evaluation run.",
+            "isOptional": true,
+            "parameterType": "NUMBER_INTEGER"
+          },
+          "dataflow_service_account": {
+            "defaultValue": "",
+            "description": "Service account to run the Dataflow job. If not set, Dataflow will use the default worker service account. For more details, see https://cloud.google.com/dataflow/docs/concepts/secURIty-and-permissions#default_worker_service_account",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "dataflow_subnetwork": {
+            "defaultValue": "",
+            "description": "Dataflow's fully qualified subnetwork name, when empty the default subnetwork will be used. More details: https://cloud.google.com/dataflow/docs/guides/specifying-networks#example_network_and_subnetwork_specifications",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "dataflow_use_public_ips": {
+            "defaultValue": true,
+            "description": "Specifies whether Dataflow workers use public IP addresses.",
+            "isOptional": true,
+            "parameterType": "BOOLEAN"
+          },
+          "dataflow_workers_num": {
+            "defaultValue": 1.0,
+            "description": "The number of workers executing the evaluation run.",
+            "isOptional": true,
+            "parameterType": "NUMBER_INTEGER"
+          },
+          "encryption_spec_key_name": {
+            "defaultValue": "",
+            "description": " Customer-managed encryption key options. If set, resources created by this pipeline will be encrypted with the provided encryption key. Has the form: `projects/my-project/locations/my-location/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "force_runner_mode": {
+            "defaultValue": "",
+            "description": "Flag to choose Beam runner. Valid options are `DirectRunner` and `Dataflow`.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "ground_truth_bigquery_source": {
+            "defaultValue": "",
+            "description": "Required for custom tabular. The BigQuery table URI representing where the ground truth is located. Used to provide ground truth for each prediction instance when they are not part of the batch prediction jobs prediction instance.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "ground_truth_format": {
+            "defaultValue": "jsonl",
+            "description": "Required for custom tabular and non tabular data. The file format for the ground truth files. `jsonl`, `csv`, and `bigquery` are the allowed formats.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "ground_truth_gcs_source": {
+            "defaultValue": [],
+            "description": "Required for custom tabular and non tabular data. The GCS URIs representing where the ground truth is located. Used to provide ground truth for each prediction instance when they are not part of the batch prediction jobs prediction instance.",
+            "isOptional": true,
+            "parameterType": "LIST"
+          },
+          "location": {
+            "defaultValue": "us-central1",
+            "description": "Location for running the evaluation.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "prediction_score_column": {
+            "defaultValue": "",
+            "description": "The column name of the field containing batch prediction scores. Formatted to be able to find nested columns, delimited by `.`.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "predictions_format": {
+            "defaultValue": "jsonl",
+            "description": "The file format for the batch prediction results. `jsonl`, `csv`, and `bigquery` are the allowed formats, from Vertex Batch Prediction.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "project": {
+            "defaultValue": "{{$.pipeline_google_cloud_project_id}}",
+            "description": "Project to run evaluation container. Defaults to the project in which the PipelineJob is run.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "target_field_name": {
+            "description": "The target field's name. Formatted to be able to find nested columns, delimited by `.`. Prefixed with 'instance.' on the component for Vertex Batch Prediction.",
+            "parameterType": "STRING"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "evaluation_metrics": {
+            "artifactType": {
+              "schemaTitle": "google.RegressionMetrics",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "`google.RegressionMetrics` representing the regression evaluation metrics in GCS."
+          }
+        },
+        "parameters": {
+          "gcp_resources": {
+            "description": "Serialized gcp_resources proto tracking the Dataflow job. For more details, see https://github.com/kubeflow/pipelines/blob/master/components/google-cloud/google_cloud_pipeline_components/proto/README.md.",
+            "parameterType": "STRING"
           }
         }
       }
@@ -234,6 +1163,115 @@
           }
         }
       }
+    },
+    "comp-model-upload-2": {
+      "executorLabel": "exec-model-upload-2",
+      "inputDefinitions": {
+        "artifacts": {
+          "parent_model": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "An artifact of a model which to upload a new version to. Only specify this field when uploading a new version. [More information.](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models/upload#request-body)",
+            "isOptional": true
+          },
+          "unmanaged_container_model": {
+            "artifactType": {
+              "schemaTitle": "google.UnmanagedContainerModel",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "The unmanaged container model to be uploaded.  The Model can be passed from an upstream step or imported via a KFP `dsl.importer`. Example:\nfrom kfp import dsl\nfrom google_cloud_pipeline_components.types import artifact_types\n\nimporter_spec = dsl.importer( artifact_uri='gs://managed-pipeline-gcpc-e2e-test/automl-tabular/model', artifact_class=artifact_types.UnmanagedContainerModel, metadata={ 'containerSpec': { 'imageUri': 'us-docker.pkg.dev/vertex-ai/automl-tabular/prediction-server:prod' } })",
+            "isOptional": true
+          }
+        },
+        "parameters": {
+          "description": {
+            "defaultValue": "",
+            "description": "The description of the Model. [More information.](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models#Model)",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "display_name": {
+            "description": "The display name of the Model. The name can be up to 128 characters long and can be consist of any UTF-8 characters. [More information.](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/projects.locations.models#Model)",
+            "parameterType": "STRING"
+          },
+          "encryption_spec_key_name": {
+            "defaultValue": "",
+            "description": "Customer-managed encryption key spec for a Model. If set, this Model and all sub-resources of this Model will be secured by this key.  Has the form: `projects/my-project/locations/my-location/keyRings/my-kr/cryptoKeys/my-key`. The key needs to be in the same region as where the compute resource is created.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "explanation_metadata": {
+            "defaultValue": {},
+            "description": "Metadata describing the Model's input and output for explanation. Both `explanation_metadata` and `explanation_parameters` must be passed together when used. [More information.](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/ExplanationSpec#explanationmetadata)",
+            "isOptional": true,
+            "parameterType": "STRUCT"
+          },
+          "explanation_parameters": {
+            "defaultValue": {},
+            "description": "Parameters to configure explaining for Model's predictions.  [More information.](https://cloud.google.com/vertex-ai/docs/reference/rest/v1/ExplanationSpec#ExplanationParameters)",
+            "isOptional": true,
+            "parameterType": "STRUCT"
+          },
+          "labels": {
+            "defaultValue": {},
+            "description": "The labels with user-defined metadata to organize your model.  Label keys and values can be no longer than 64 characters (Unicode codepoints), can only contain lowercase letters, numeric characters, underscores and dashes. International characters are allowed.  See https://goo.gl/xmQnxf for more information and examples of labels.",
+            "isOptional": true,
+            "parameterType": "STRUCT"
+          },
+          "location": {
+            "defaultValue": "us-central1",
+            "description": "Optional location to upload this Model to. If not set, defaults to `us-central1`.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "project": {
+            "defaultValue": "{{$.pipeline_google_cloud_project_id}}",
+            "description": "Project to upload this Model to. Defaults to the project in which the PipelineJob is run.",
+            "isOptional": true,
+            "parameterType": "STRING"
+          },
+          "version_aliases": {
+            "defaultValue": [],
+            "description": "User provided version aliases so that a model version can be referenced via alias (i.e. `projects/{project}/locations/{location}/models/{modelId}@{version_alias}` instead of auto-generated version id (i.e. `projects/{project}/locations/{location}/models/{modelId}@{versionId}`). The format is [a-z][a-zA-Z0-9-]{0,126}[a-z0-9] to distinguish from versionId. A default version alias will be created for the first version of the model, and there must be exactly one default version alias for a model.",
+            "isOptional": true,
+            "parameterType": "LIST"
+          }
+        }
+      },
+      "outputDefinitions": {
+        "artifacts": {
+          "model": {
+            "artifactType": {
+              "schemaTitle": "google.VertexModel",
+              "schemaVersion": "0.0.1"
+            },
+            "description": "Artifact tracking the created Model version."
+          }
+        },
+        "parameters": {
+          "gcp_resources": {
+            "description": "Serialized JSON of `gcp_resources` [proto](https://github.com/kubeflow/pipelines/tree/master/components/google-cloud/google_cloud_pipeline_components/proto) which tracks the upload Model's long-running operation.",
+            "parameterType": "STRING"
+          }
+        }
+      }
+    },
+    "comp-vertex-pipelines-notification-email": {
+      "executorLabel": "exec-vertex-pipelines-notification-email",
+      "inputDefinitions": {
+        "parameters": {
+          "pipeline_task_final_status": {
+            "isOptional": true,
+            "parameterType": "TASK_FINAL_STATUS"
+          },
+          "recipients": {
+            "description": "A list of email addresses to send a notification to.",
+            "parameterType": "LIST"
+          }
+        }
+      }
     }
   },
   "defaultPipelineRoot": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs",
@@ -278,6 +1316,109 @@
           }
         }
       },
+      "exec-importer-2": {
+        "importer": {
+          "artifactUri": {
+            "runtimeParameter": "uri"
+          },
+          "metadata": {
+            "resourceName": "fprojects/{PROJECT_ID}/locations/{REGION}/models/1234567890123472"
+          },
+          "typeSchema": {
+            "schemaTitle": "google.VertexModel",
+            "schemaVersion": "0.0.1"
+          }
+        }
+      },
+      "exec-model-batch-predict": {
+        "container": {
+          "args": [
+            "--type",
+            "BatchPredictionJob",
+            "--payload",
+            "{\"Concat\": [\"{\", \"\\\"display_name\\\": \\\"\", \"{{$.inputs.parameters['job_display_name']}}\", \"\\\", \", {\"IfPresent\": {\"InputName\": \"model\", \"Then\": {\"Concat\": [\"\\\"model\\\": \\\"\", \"{{$.inputs.artifacts['model'].metadata['resourceName']}}\", \"\\\",\"]}}}, \" \\\"input_config\\\": {\", \"\\\"instances_format\\\": \\\"\", \"{{$.inputs.parameters['instances_format']}}\", \"\\\"\", \", \\\"gcs_source\\\": {\", \"\\\"uris\\\":\", \"{{$.inputs.parameters['gcs_source_uris']}}\", \"}\", \", \\\"bigquery_source\\\": {\", \"\\\"input_uri\\\": \\\"\", \"{{$.inputs.parameters['bigquery_source_input_uri']}}\", \"\\\"\", \"}\", \"}\", \", \\\"instance_config\\\": {\", \"\\\"instance_type\\\": \\\"\", \"{{$.inputs.parameters['instance_type']}}\", \"\\\"\", \", \\\"key_field\\\": \\\"\", \"{{$.inputs.parameters['key_field']}}\", \"\\\" \", {\"IfPresent\": {\"InputName\": \"included_fields\", \"Then\": {\"Concat\": [\", \\\"included_fields\\\": \", \"{{$.inputs.parameters['included_fields']}}\"]}}}, {\"IfPresent\": {\"InputName\": \"excluded_fields\", \"Then\": {\"Concat\": [\", \\\"excluded_fields\\\": \", \"{{$.inputs.parameters['excluded_fields']}}\"]}}}, \"}\", \", \\\"model_parameters\\\": \", \"{{$.inputs.parameters['model_parameters']}}\", \", \\\"output_config\\\": {\", \"\\\"predictions_format\\\": \\\"\", \"{{$.inputs.parameters['predictions_format']}}\", \"\\\"\", \", \\\"gcs_destination\\\": {\", \"\\\"output_uri_prefix\\\": \\\"\", \"{{$.inputs.parameters['gcs_destination_output_uri_prefix']}}\", \"\\\"\", \"}\", \", \\\"bigquery_destination\\\": {\", \"\\\"output_uri\\\": \\\"\", \"{{$.inputs.parameters['bigquery_destination_output_uri']}}\", \"\\\"\", \"}\", \"}\", \", \\\"dedicated_resources\\\": {\", \"\\\"machine_spec\\\": {\", \"\\\"machine_type\\\": \\\"\", \"{{$.inputs.parameters['machine_type']}}\", \"\\\"\", \", \\\"accelerator_type\\\": \\\"\", \"{{$.inputs.parameters['accelerator_type']}}\", \"\\\"\", \", \\\"accelerator_count\\\": \", \"{{$.inputs.parameters['accelerator_count']}}\", \"}\", \", \\\"starting_replica_count\\\": \", \"{{$.inputs.parameters['starting_replica_count']}}\", \", \\\"max_replica_count\\\": \", \"{{$.inputs.parameters['max_replica_count']}}\", \"}\", \", \\\"service_account\\\": \\\"\", \"{{$.inputs.parameters['service_account']}}\", \"\\\"\", \", \\\"manual_batch_tuning_parameters\\\": {\", \"\\\"batch_size\\\": \", \"{{$.inputs.parameters['manual_batch_tuning_parameters_batch_size']}}\", \"}\", \", \\\"generate_explanation\\\": \", \"{{$.inputs.parameters['generate_explanation']}}\", \", \\\"explanation_spec\\\": {\", \"\\\"parameters\\\": \", \"{{$.inputs.parameters['explanation_parameters']}}\", \", \\\"metadata\\\": \", \"{{$.inputs.parameters['explanation_metadata']}}\", \"}\", \", \\\"labels\\\": \", \"{{$.inputs.parameters['labels']}}\", \", \\\"encryption_spec\\\": {\\\"kms_key_name\\\":\\\"\", \"{{$.inputs.parameters['encryption_spec_key_name']}}\", \"\\\"}\", \"}\"]}",
+            "--project",
+            "{{$.inputs.parameters['project']}}",
+            "--location",
+            "{{$.inputs.parameters['location']}}",
+            "--gcp_resources",
+            "{{$.outputs.parameters['gcp_resources'].output_file}}",
+            "--executor_input",
+            "{{$}}"
+          ],
+          "command": [
+            "python3",
+            "-u",
+            "-m",
+            "google_cloud_pipeline_components.container.v1.batch_prediction_job.launcher"
+          ],
+          "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:2.22.0"
+        }
+      },
+      "exec-model-evaluation-regression": {
+        "container": {
+          "args": [
+            "--setup_file",
+            "/setup.py",
+            "--json_mode",
+            "true",
+            "--project_id",
+            "{{$.inputs.parameters['project']}}",
+            "--location",
+            "{{$.inputs.parameters['location']}}",
+            "--problem_type",
+            "regression",
+            "--target_field_name",
+            "{\"Concat\": [\"instance.\", \"{{$.inputs.parameters['target_field_name']}}\"]}",
+            "--batch_prediction_format",
+            "{{$.inputs.parameters['predictions_format']}}",
+            "{\"IfPresent\": {\"InputName\": \"predictions_gcs_source\", \"Then\": [\"--batch_prediction_gcs_source\", \"{{$.inputs.artifacts['predictions_gcs_source'].uri}}\"]}}",
+            "{\"IfPresent\": {\"InputName\": \"predictions_bigquery_source\", \"Then\": [\"--batch_prediction_bigquery_source\", {\"Concat\": [\"bq://\", \"{{$.inputs.artifacts['predictions_bigquery_source'].metadata['projectId']}}\", \".\", \"{{$.inputs.artifacts['predictions_bigquery_source'].metadata['datasetId']}}\", \".\", \"{{$.inputs.artifacts['predictions_bigquery_source'].metadata['tableId']}}\"]}]}}",
+            "{\"IfPresent\": {\"InputName\": \"model\", \"Then\": [\"--model_name\", \"{{$.inputs.artifacts['model'].metadata['resourceName']}}\"]}}",
+            "--ground_truth_format",
+            "{{$.inputs.parameters['ground_truth_format']}}",
+            "--ground_truth_gcs_source",
+            "{{$.inputs.parameters['ground_truth_gcs_source']}}",
+            "--ground_truth_bigquery_source",
+            "{{$.inputs.parameters['ground_truth_bigquery_source']}}",
+            "--root_dir",
+            "{{$.pipeline_root}}/{{$.pipeline_job_uuid}}-{{$.pipeline_task_uuid}}",
+            "--prediction_score_column",
+            "{{$.inputs.parameters['prediction_score_column']}}",
+            "--dataflow_job_prefix",
+            "evaluation-regression-{{$.pipeline_job_uuid}}-{{$.pipeline_task_uuid}}",
+            "--dataflow_service_account",
+            "{{$.inputs.parameters['dataflow_service_account']}}",
+            "--dataflow_disk_size",
+            "{{$.inputs.parameters['dataflow_disk_size_gb']}}",
+            "--dataflow_machine_type",
+            "{{$.inputs.parameters['dataflow_machine_type']}}",
+            "--dataflow_workers_num",
+            "{{$.inputs.parameters['dataflow_workers_num']}}",
+            "--dataflow_max_workers_num",
+            "{{$.inputs.parameters['dataflow_max_workers_num']}}",
+            "--dataflow_subnetwork",
+            "{{$.inputs.parameters['dataflow_subnetwork']}}",
+            "--dataflow_use_public_ips",
+            "{{$.inputs.parameters['dataflow_use_public_ips']}}",
+            "--kms_key_name",
+            "{{$.inputs.parameters['encryption_spec_key_name']}}",
+            "--force_runner_mode",
+            "{{$.inputs.parameters['force_runner_mode']}}",
+            "--output_metrics_gcs_path",
+            "{{$.outputs.artifacts['evaluation_metrics'].path}}",
+            "--gcp_resources",
+            "{{$.outputs.parameters['gcp_resources'].output_file}}",
+            "--executor_input",
+            "{{$}}"
+          ],
+          "command": [
+            "python3",
+            "/main.py"
+          ],
+          "image": "gcr.io/ml-pipeline/model-evaluation:v0.9.4"
+        }
+      },
       "exec-model-upload": {
         "container": {
           "args": [
@@ -303,6 +1444,49 @@
           ],
           "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:2.22.0"
         }
+      },
+      "exec-model-upload-2": {
+        "container": {
+          "args": [
+            "--type",
+            "UploadModel",
+            "--payload",
+            "{\"Concat\": [\"{\", \"\\\"display_name\\\": \\\"\", \"{{$.inputs.parameters['display_name']}}\", \"\\\"\", \", \\\"description\\\": \\\"\", \"{{$.inputs.parameters['description']}}\", \"\\\"\", \", \\\"explanation_spec\\\": {\", \"\\\"parameters\\\": \", \"{{$.inputs.parameters['explanation_parameters']}}\", \", \\\"metadata\\\": \", \"{{$.inputs.parameters['explanation_metadata']}}\", \"}\", \", \\\"encryption_spec\\\": {\\\"kms_key_name\\\":\\\"\", \"{{$.inputs.parameters['encryption_spec_key_name']}}\", \"\\\"}\", \", \\\"version_aliases\\\": \", \"{{$.inputs.parameters['version_aliases']}}\", \", \\\"labels\\\": \", \"{{$.inputs.parameters['labels']}}\", \", \\\"pipeline_job\\\": \\\"\", \"projects/{{$.inputs.parameters['project']}}/locations/{{$.inputs.parameters['location']}}/pipelineJobs/{{$.pipeline_job_uuid}}\", \"\\\"\", \"}\"]}",
+            "--project",
+            "{{$.inputs.parameters['project']}}",
+            "--location",
+            "{{$.inputs.parameters['location']}}",
+            "--gcp_resources",
+            "{{$.outputs.parameters['gcp_resources'].output_file}}",
+            "--executor_input",
+            "{{$}}",
+            "{\"IfPresent\": {\"InputName\": \"parent_model\", \"Then\": [\"--parent_model_name\", \"{{$.inputs.artifacts['parent_model'].metadata['resourceName']}}\"]}}"
+          ],
+          "command": [
+            "python3",
+            "-u",
+            "-m",
+            "google_cloud_pipeline_components.container.v1.model.upload_model.launcher"
+          ],
+          "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:2.22.0"
+        }
+      },
+      "exec-vertex-pipelines-notification-email": {
+        "container": {
+          "args": [
+            "--type",
+            "VertexNotificationEmail",
+            "--payload",
+            ""
+          ],
+          "command": [
+            "python3",
+            "-u",
+            "-m",
+            "google_cloud_pipeline_components.container.v1.vertex_notification_email.executor"
+          ],
+          "image": "gcr.io/ml-pipeline/google-cloud-pipeline-components:2.22.0"
+        }
       }
     }
   },
@@ -312,108 +1496,61 @@
   "root": {
     "dag": {
       "tasks": {
-        "custom-training-job": {
+        "exit-handler-1": {
+          "componentRef": {
+            "name": "comp-exit-handler-1"
+          },
+          "inputs": {
+            "parameters": {
+              "pipelinechannel--base_output_dir": {
+                "componentInputParameter": "base_output_dir"
+              },
+              "pipelinechannel--existing_model": {
+                "componentInputParameter": "existing_model"
+              },
+              "pipelinechannel--location": {
+                "componentInputParameter": "location"
+              },
+              "pipelinechannel--project": {
+                "componentInputParameter": "project"
+              }
+            }
+          },
+          "taskInfo": {
+            "name": "MLOps Continuous Training Pipeline"
+          }
+        },
+        "vertex-pipelines-notification-email": {
           "cachingOptions": {
             "enableCache": true
           },
           "componentRef": {
-            "name": "comp-custom-training-job"
+            "name": "comp-vertex-pipelines-notification-email"
           },
+          "dependentTasks": [
+            "exit-handler-1"
+          ],
           "inputs": {
             "parameters": {
-              "base_output_directory": {
-                "runtimeValue": {
-                  "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs"
+              "pipeline_task_final_status": {
+                "taskFinalStatus": {
+                  "producerTask": "exit-handler-1"
                 }
               },
-              "display_name": {
-                "runtimeValue": {
-                  "constant": "iris-train"
-                }
-              },
-              "location": {
-                "componentInputParameter": "location"
-              },
-              "project": {
-                "componentInputParameter": "project"
-              },
-              "worker_pool_specs": {
+              "recipients": {
                 "runtimeValue": {
                   "constant": [
-                    {
-                      "container_spec": {
-                        "image_uri": "us-central1-docker.pkg.dev/certifiedgpt/ml-containers/vertex-iris-expert-pipeline:latest"
-                      },
-                      "machine_spec": {
-                        "machine_type": "n1-standard-4"
-                      },
-                      "replica_count": 1.0
-                    }
+                    "leo.desouza@gmail.com"
                   ]
                 }
               }
             }
           },
           "taskInfo": {
-            "name": "custom-training-job"
-          }
-        },
-        "importer": {
-          "cachingOptions": {
-            "enableCache": true
+            "name": "vertex-pipelines-notification-email"
           },
-          "componentRef": {
-            "name": "comp-importer"
-          },
-          "dependentTasks": [
-            "custom-training-job"
-          ],
-          "inputs": {
-            "parameters": {
-              "uri": {
-                "componentInputParameter": "base_output_dir"
-              }
-            }
-          },
-          "taskInfo": {
-            "name": "importer"
-          }
-        },
-        "model-upload": {
-          "cachingOptions": {
-            "enableCache": true
-          },
-          "componentRef": {
-            "name": "comp-model-upload"
-          },
-          "dependentTasks": [
-            "importer"
-          ],
-          "inputs": {
-            "artifacts": {
-              "unmanaged_container_model": {
-                "taskOutputArtifact": {
-                  "outputArtifactKey": "artifact",
-                  "producerTask": "importer"
-                }
-              }
-            },
-            "parameters": {
-              "display_name": {
-                "runtimeValue": {
-                  "constant": "iris-expert-model"
-                }
-              },
-              "location": {
-                "componentInputParameter": "location"
-              },
-              "project": {
-                "componentInputParameter": "project"
-              }
-            }
-          },
-          "taskInfo": {
-            "name": "model-upload"
+          "triggerPolicy": {
+            "strategy": "ALL_UPSTREAM_TASKS_COMPLETED"
           }
         }
       }
@@ -424,6 +1561,11 @@
           "defaultValue": "gs://certifiedgpt-vertex-pipelines-us-central1",
           "isOptional": true,
           "parameterType": "STRING"
+        },
+        "existing_model": {
+          "defaultValue": false,
+          "isOptional": true,
+          "parameterType": "BOOLEAN"
         },
         "location": {
           "defaultValue": "us-central1",
