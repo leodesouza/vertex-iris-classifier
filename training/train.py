@@ -5,13 +5,21 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from google.cloud import storage
+import argparse
 
 def train():
+    
     # AIP_MODEL_DIR: onde o Vertex espera o modelo
     # AIP_CHECKPOINT_DIR: podemos usar para exportar dados auxiliares
-    BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1"
-    PIPELINE_ROOT = f"gs://{BUCKET_NAME}/pipelines/iris/runs/"
-    gcs_output_path = PIPELINE_ROOT  #os.environ.get("AIP_MODEL_DIR")
+    BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1"        
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--run_id", type=str, required=True)
+    args = parser.parse_args()
+    RUN_ID = args.run_id    
+    gcs_output_path = f"gs://{BUCKET_NAME}/pipelines/iris/runs/{RUN_ID}/model/" 
+    
+    
     
     # 1. Dataset
     iris = load_iris()

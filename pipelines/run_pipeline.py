@@ -11,10 +11,10 @@ def run():
     # Centralizando as configurações
     PROJECT_ID = "certifiedgpt"
     REGION = "us-central1"
-    BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1" # poderia ser ml-dev-bucket, ml-stagin-bucket ml-prod-bucket
-    MODEL_GCS_DIR = f"gs://{BUCKET_NAME}"
-    PIPELINE_RUNS = f"{MODEL_GCS_DIR}/pipelines/iris/runs"  
-
+    # poderia ser ml-dev-bucket, ml-stagin-bucket ml-prod-bucket
+    BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1" 
+    
+    
     aiplatform.init(project=PROJECT_ID, location=REGION)
 
     # 1. Compilação
@@ -28,12 +28,11 @@ def run():
     # 2. Execução no Vertex AI
     job = aiplatform.PipelineJob(
         display_name="expert-iris-run",
-        template_path=package_path,
-        pipeline_root=PIPELINE_RUNS,
+        template_path=package_path,  
+        pipeline_root = f"gs://{BUCKET_NAME}/pipelines/iris/runs/{{{{$.pipeline_job_uuid}}}}",     
         parameter_values={            
             "project": PROJECT_ID,
-            "location": REGION,
-            "base_output_dir": PIPELINE_RUNS,
+            "location": REGION,            
             "existing_model": False
         },
         enable_caching=False  # Mantém o cache para economizar tempo/dinheiro em steps que não mudaram

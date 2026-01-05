@@ -25,7 +25,9 @@
             "inputs": {
               "parameters": {
                 "uri": {
-                  "componentInputParameter": "pipelinechannel--base_output_dir"
+                  "runtimeValue": {
+                    "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs/{{$.pipeline_job_uuid}}/model"
+                  }
                 }
               }
             },
@@ -85,9 +87,6 @@
           }
         },
         "parameters": {
-          "pipelinechannel--base_output_dir": {
-            "parameterType": "STRING"
-          },
           "pipelinechannel--existing_model": {
             "parameterType": "BOOLEAN"
           },
@@ -197,12 +196,12 @@
             "pipelinechannel--condition-branches-2-oneof-1": {
               "artifactSelectors": [
                 {
-                  "outputArtifactKey": "pipelinechannel--model-upload-model",
-                  "producerSubtask": "condition-3"
-                },
-                {
                   "outputArtifactKey": "pipelinechannel--model-upload-2-model",
                   "producerSubtask": "condition-4"
+                },
+                {
+                  "outputArtifactKey": "pipelinechannel--model-upload-model",
+                  "producerSubtask": "condition-3"
                 }
               ]
             }
@@ -220,9 +219,6 @@
                 }
               },
               "parameters": {
-                "pipelinechannel--base_output_dir": {
-                  "componentInputParameter": "pipelinechannel--base_output_dir"
-                },
                 "pipelinechannel--existing_model": {
                   "componentInputParameter": "pipelinechannel--existing_model"
                 },
@@ -282,9 +278,6 @@
           }
         },
         "parameters": {
-          "pipelinechannel--base_output_dir": {
-            "parameterType": "STRING"
-          },
           "pipelinechannel--existing_model": {
             "parameterType": "BOOLEAN"
           },
@@ -448,9 +441,6 @@
                 }
               },
               "parameters": {
-                "pipelinechannel--base_output_dir": {
-                  "componentInputParameter": "pipelinechannel--base_output_dir"
-                },
                 "pipelinechannel--existing_model": {
                   "componentInputParameter": "pipelinechannel--existing_model"
                 },
@@ -496,6 +486,10 @@
                     "constant": [
                       {
                         "container_spec": {
+                          "args": [
+                            "--run_id",
+                            "{{$.pipeline_job_uuid}}"
+                          ],
                           "image_uri": "us-central1-docker.pkg.dev/certifiedgpt/ml-containers/vertex-iris-expert-pipeline:latest"
                         },
                         "machine_spec": {
@@ -526,7 +520,7 @@
               "parameters": {
                 "uri": {
                   "runtimeValue": {
-                    "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs"
+                    "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs/{{$.pipeline_job_uuid}}/model"
                   }
                 }
               }
@@ -676,9 +670,6 @@
       },
       "inputDefinitions": {
         "parameters": {
-          "pipelinechannel--base_output_dir": {
-            "parameterType": "STRING"
-          },
           "pipelinechannel--existing_model": {
             "parameterType": "BOOLEAN"
           },
@@ -1325,7 +1316,6 @@
       }
     }
   },
-  "defaultPipelineRoot": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs",
   "deploymentSpec": {
     "executors": {
       "exec-custom-training-job": {
@@ -1354,7 +1344,7 @@
       "exec-importer": {
         "importer": {
           "artifactUri": {
-            "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs"
+            "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs/{{$.pipeline_job_uuid}}/model"
           },
           "metadata": {
             "containerSpec": {
@@ -1370,10 +1360,10 @@
       "exec-importer-2": {
         "importer": {
           "artifactUri": {
-            "runtimeParameter": "uri"
+            "constant": "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs/{{$.pipeline_job_uuid}}/model"
           },
           "metadata": {
-            "resourceName": "fprojects/{PROJECT_ID}/locations/{REGION}/models/1234567890123472"
+            "resourceName": "projects/certifiedgpt/locations/us-central1/models/1234567890123472"
           },
           "typeSchema": {
             "schemaTitle": "google.VertexModel",
@@ -1562,9 +1552,6 @@
           },
           "inputs": {
             "parameters": {
-              "pipelinechannel--base_output_dir": {
-                "componentInputParameter": "base_output_dir"
-              },
               "pipelinechannel--existing_model": {
                 "componentInputParameter": "existing_model"
               },
@@ -1617,11 +1604,6 @@
     },
     "inputDefinitions": {
       "parameters": {
-        "base_output_dir": {
-          "defaultValue": "gs://certifiedgpt-vertex-pipelines-us-central1",
-          "isOptional": true,
-          "parameterType": "STRING"
-        },
         "existing_model": {
           "defaultValue": false,
           "isOptional": true,

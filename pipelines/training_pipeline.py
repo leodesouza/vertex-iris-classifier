@@ -11,28 +11,24 @@ from google_cloud_pipeline_components.v1.vertex_notification_email import Vertex
 
 PROJECT_ID = "certifiedgpt"
 REGION = "us-central1"
-BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1"
-# MODEL_GCS_DIR = f"gs://{BUCKET_NAME}/models/iris-model"
-MODEL_GCS_DIR = f"gs://{BUCKET_NAME}"
 
-PIPELINE_ROOT = f"gs://{BUCKET_NAME}/pipelines/iris/runs"
-MODEL_BASE_DIR = f"gs://{BUCKET_NAME}/models/iris"
-
-TRAIN_IMAGE = (
-    f"{REGION}-docker.pkg.dev/{PROJECT_ID}"
-    "/ml-containers/vertex-iris-expert-pipeline:latest"
-)
-
-BUCKET_URI = "gs://{}".format(BUCKET_NAME)
-
-@dsl.pipeline(name="iris-pipeline", pipeline_root=PIPELINE_ROOT)
+#pipeline_root=PIPELINE_ROOT
+@dsl.pipeline(name="iris-pipeline")
 def iris_pipeline(    
     project: str = PROJECT_ID,
-    location: str = REGION,
-    base_output_dir: str = MODEL_GCS_DIR,
+    location: str = REGION,    
     existing_model: bool=False    
 ):
-
+  
+    
+    BUCKET_NAME = "certifiedgpt-vertex-pipelines-us-central1"
+    #PIPELINE_ROOT = f"gs://{BUCKET_NAME}/pipelines/iris/runs"
+    OUTPUT_DIRECTORY = f"gs://{BUCKET_NAME}/pipelines/iris/runs"
+    BUCKET_URI = "gs://{}".format(BUCKET_NAME)
+    TRAIN_IMAGE = (
+        f"{REGION}-docker.pkg.dev/{PROJECT_ID}"
+        "/ml-containers/vertex-iris-expert-pipeline:latest"
+    )  
     EMAIL_RECIPIENTS = [ "leo.desouza@gmail.com" ]
     notify_task = VertexNotificationEmailOp(
                     recipients= EMAIL_RECIPIENTS
@@ -45,31 +41,45 @@ def iris_pipeline(
             project=project,
             location=location,
             display_name="iris-train",
-            base_output_directory=PIPELINE_ROOT,
-            worker_pool_specs=[{
-                "machine_spec": {"machine_type": "n1-standard-4"},
-                "replica_count": 1,
-                "container_spec": {"image_uri": TRAIN_IMAGE}
-            }],
+            base_output_directory=OUTPUT_DIRECTORY,
+            worker_pool_specs=[
+                {
+                    "machine_spec": {
+                        "machine_type": "n1-standard-4"
+                    },
+                    "replica_count": 1,
+                    "container_spec": {
+                        "image_uri": TRAIN_IMAGE,
+                        "args": [
+                            "--run_id",
+                            "{{$.pipeline_job_uuid}}"
+                        ]
+                    }
+                }
+            ],
         )
+
     
         import_unmanaged_model_task = dsl.importer(
-            artifact_uri=PIPELINE_ROOT,
+            #artifact_uri="{{$.pipeline_root}}/{{$.pipeline_job_uuid}}",
+            artifact_uri=f"{OUTPUT_DIRECTORY}/{{{{$.pipeline_job_uuid}}}}/model",            
             artifact_class=artifact_types.UnmanagedContainerModel,
             metadata={
                 "containerSpec": {
                     "imageUri": "us-docker.pkg.dev/vertex-ai/prediction/sklearn-cpu.1-3:latest"
                 }
-            }        
+            }
         ).after(custom_job)
+
         
         with dsl.If(existing_model == True):
             # Import the parent model to upload as a version
             import_registry_model_task = dsl.importer(
-                                        artifact_uri=base_output_dir,
+                                        #artifact_uri="{{$.pipeline_root}}/{{$.pipeline_job_uuid}}",
+                                        artifact_uri=f"{OUTPUT_DIRECTORY}/{{{{$.pipeline_job_uuid}}}}/model",
                                         artifact_class=artifact_types.VertexModel,
                                         metadata={
-                                            "resourceName": "fprojects/{PROJECT_ID}/locations/{REGION}/models/1234567890123472",
+                                            "resourceName": f"projects/{PROJECT_ID}/locations/{REGION}/models/1234567890123472",
                                         },
                                     ).after(import_unmanaged_model_task)
             # Upload the model as a version
@@ -87,12 +97,16 @@ def iris_pipeline(
                 display_name="iris-expert-model",        
                 unmanaged_container_model=import_unmanaged_model_task.outputs["artifact"]            
             )
-        model_resource = OneOf(model_version_upload_op.outputs["model"], model_upload_op.outputs["model"])
+        
+        model_resource = dsl.OneOf(
+            model_upload_op.outputs["model"], 
+            model_version_upload_op.outputs["model"]
+        )
         # Batch prediction
         batch_predict_task = ModelBatchPredictOp(
                             project= project,
                             job_display_name= "prediction-batch-job",
-                            model= model_resource,
+                            model=model_resource,
                             location= location,
                             instances_format= "csv",
                             predictions_format= "jsonl",

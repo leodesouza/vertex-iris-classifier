@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir \
 COPY training/train.py /app/train.py
 
 # Força stdout não-bufferizado
-CMD ["python", "-u", "/app/train.py"]
+ENTRYPOINT ["python", "-u", "/app/train.py"]
