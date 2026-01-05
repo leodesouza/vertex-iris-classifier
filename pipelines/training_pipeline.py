@@ -115,15 +115,15 @@ def iris_pipeline(
         evaluation_task = ModelEvaluationClassificationOp(
                 project=project,
                 location=location,
-                target_field_name="species",
+                target_field_name="target",
                 # Em classificação, usamos 'prediction_label_column' para a classe final
                 prediction_label_column="prediction", 
                 prediction_score_column="prediction",
                 predictions_format="jsonl",
                 predictions_gcs_source=batch_predict_task.outputs["gcs_output_directory"],
                 ground_truth_format="csv",
-                class_labels=["setosa", "versicolor", "virginica"],
-                ground_truth_gcs_source=[f"{BUCKET_URI}/test.csv"]
+                class_labels=["0", "1", "2"],
+                ground_truth_gcs_source=[f"{BUCKET_URI}/test_ground_truth.csv"]
             )
     return
     

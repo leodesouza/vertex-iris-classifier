@@ -36,7 +36,7 @@ def run():
             "base_output_dir": PIPELINE_RUNS,
             "existing_model": False
         },
-        enable_caching=True  # Mantém o cache para economizar tempo/dinheiro em steps que não mudaram
+        enable_caching=False  # Mantém o cache para economizar tempo/dinheiro em steps que não mudaram
     )
 
     # submit() envia para a nuvem; submit(service_account=...) seria o ideal para produção

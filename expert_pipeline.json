@@ -622,9 +622,9 @@
                 "class_labels": {
                   "runtimeValue": {
                     "constant": [
-                      "setosa",
-                      "versicolor",
-                      "virginica"
+                      "0",
+                      "1",
+                      "2"
                     ]
                   }
                 },
@@ -636,7 +636,7 @@
                 "ground_truth_gcs_source": {
                   "runtimeValue": {
                     "constant": [
-                      "gs://certifiedgpt-vertex-pipelines-us-central1/test.csv"
+                      "gs://certifiedgpt-vertex-pipelines-us-central1/test_ground_truth.csv"
                     ]
                   }
                 },
@@ -663,7 +663,7 @@
                 },
                 "target_field_name": {
                   "runtimeValue": {
-                    "constant": "species"
+                    "constant": "target"
                   }
                 }
               }
