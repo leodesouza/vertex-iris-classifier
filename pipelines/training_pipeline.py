@@ -1,9 +1,10 @@
+import json
 from kfp import dsl
 from kfp.dsl import OneOf
 from google_cloud_pipeline_components.v1.custom_job import CustomTrainingJobOp
 from google_cloud_pipeline_components.v1.model import ModelUploadOp
 from google_cloud_pipeline_components.v1.batch_predict_job import ModelBatchPredictOp
-from google_cloud_pipeline_components.v1.model_evaluation import ModelEvaluationRegressionOp
+from google_cloud_pipeline_components.v1.model_evaluation import ModelEvaluationRegressionOp, ModelEvaluationClassificationOp
 from google_cloud_pipeline_components.types import artifact_types
 from pipelines.components.evaluate import evaluate_model
 from google_cloud_pipeline_components.v1.vertex_notification_email import VertexNotificationEmailOp
@@ -53,11 +54,11 @@ def iris_pipeline(
         )
     
         import_unmanaged_model_task = dsl.importer(
-            artifact_uri=base_output_dir,
+            artifact_uri=PIPELINE_ROOT,
             artifact_class=artifact_types.UnmanagedContainerModel,
             metadata={
                 "containerSpec": {
-                    "imageUri": "us-docker.pkg.dev/vertex-ai/prediction/sklearn-cpu.1-0:latest"
+                    "imageUri": "us-docker.pkg.dev/vertex-ai/prediction/sklearn-cpu.1-3:latest"
                 }
             }        
         ).after(custom_job)
@@ -100,16 +101,30 @@ def iris_pipeline(
                             machine_type= 'n1-standard-4'
                             )
         # Evaluation task
-        evaluation_task = ModelEvaluationRegressionOp(
-                            project= project,
-                            target_field_name= "fare",
-                            location= location,
-                            # model= model_resource,
-                            predictions_format= "jsonl",
-                            predictions_gcs_source= batch_predict_task.outputs["gcs_output_directory"],
-                            ground_truth_format= "csv",
-                            ground_truth_gcs_source= [f"{BUCKET_URI}/test.csv"]
-                            )
+        # evaluation_task = ModelEvaluationRegressionOp(
+        #                     project= project,
+        #                     target_field_name= "species",
+        #                     location= location,
+        #                     # model= model_resource,
+        #                     prediction_score_column="prediction",
+        #                     predictions_format= "jsonl",
+        #                     predictions_gcs_source= batch_predict_task.outputs["gcs_output_directory"],
+        #                     ground_truth_format= "csv",
+        #                     ground_truth_gcs_source= [f"{BUCKET_URI}/test.csv"]
+        #                     )
+        evaluation_task = ModelEvaluationClassificationOp(
+                project=project,
+                location=location,
+                target_field_name="species",
+                # Em classificação, usamos 'prediction_label_column' para a classe final
+                prediction_label_column="prediction", 
+                prediction_score_column="prediction",
+                predictions_format="jsonl",
+                predictions_gcs_source=batch_predict_task.outputs["gcs_output_directory"],
+                ground_truth_format="csv",
+                class_labels=["setosa", "versicolor", "virginica"],
+                ground_truth_gcs_source=[f"{BUCKET_URI}/test.csv"]
+            )
     return
     
 

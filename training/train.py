@@ -28,6 +28,12 @@ def train():
     local_model_path = "outputs/model.joblib"        
     joblib.dump(model, local_model_path)
     
+    test_df = pd.DataFrame(X_test)
+    test_df.to_csv("outputs/test_no_target.csv", index=False, header=False)
+    test_with_target = test_df.copy()
+    test_with_target['target'] = y_test
+    test_with_target.to_csv("outputs/test_ground_truth.csv", index=False)
+    
     
     # 4. Upload para GCS
     if gcs_output_path:
@@ -42,7 +48,10 @@ def train():
         # Upload do Modelo (O Vertex espera isso para o registro)
         model_blob = bucket.blob(f"{blob_prefix}model.joblib")
         model_blob.upload_from_filename(local_model_path)
-        print(f"Modelo enviado para: {gcs_output_path}model.joblib")            
+        print(f"Modelo enviado para: {gcs_output_path}model.joblib")  
+        
+        bucket.blob(f"test_no_target.csv").upload_from_filename("outputs/test_no_target.csv")
+        bucket.blob(f"test_ground_truth.csv").upload_from_filename("outputs/test_ground_truth.csv")          
 
 if __name__ == "__main__":
     train()
