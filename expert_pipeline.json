@@ -557,7 +557,7 @@
                 "gcs_source_uris": {
                   "runtimeValue": {
                     "constant": [
-                      "gs://certifiedgpt-vertex-pipelines-us-central1/test_no_target.csv"
+                      "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs/{{$.pipeline_job_uuid}}/data/test_no_target.csv"
                     ]
                   }
                 },
@@ -630,7 +630,7 @@
                 "ground_truth_gcs_source": {
                   "runtimeValue": {
                     "constant": [
-                      "gs://certifiedgpt-vertex-pipelines-us-central1/test_ground_truth.csv"
+                      "gs://certifiedgpt-vertex-pipelines-us-central1/pipelines/iris/runs/{{$.pipeline_job_uuid}}/data/test_ground_truth.csv"
                     ]
                   }
                 },

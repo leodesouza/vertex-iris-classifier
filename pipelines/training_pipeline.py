@@ -58,7 +58,6 @@ def iris_pipeline(
                 }
             ],
         )
-
     
         import_unmanaged_model_task = dsl.importer(
             #artifact_uri="{{$.pipeline_root}}/{{$.pipeline_job_uuid}}",
@@ -73,7 +72,7 @@ def iris_pipeline(
 
         
         with dsl.If(existing_model == True):
-            # Import the parent model to upload as a version
+
             import_registry_model_task = dsl.importer(
                                         #artifact_uri="{{$.pipeline_root}}/{{$.pipeline_job_uuid}}",
                                         artifact_uri=f"{OUTPUT_DIRECTORY}/{{{{$.pipeline_job_uuid}}}}/model",
@@ -82,7 +81,8 @@ def iris_pipeline(
                                             "resourceName": f"projects/{PROJECT_ID}/locations/{REGION}/models/1234567890123472",
                                         },
                                     ).after(import_unmanaged_model_task)
-            # Upload the model as a version
+            
+            
             model_version_upload_op = ModelUploadOp(
                                     project=project,
                                     location=location,
@@ -110,7 +110,7 @@ def iris_pipeline(
                             location= location,
                             instances_format= "csv",
                             predictions_format= "jsonl",
-                            gcs_source_uris= [f"{BUCKET_URI}/test_no_target.csv"],
+                            gcs_source_uris= [f"{OUTPUT_DIRECTORY}/{{{{$.pipeline_job_uuid}}}}/data/test_no_target.csv"],
                             gcs_destination_output_uri_prefix= f"{BUCKET_URI}/batch_predict_output",
                             machine_type= 'n1-standard-4'
                             )
@@ -137,7 +137,7 @@ def iris_pipeline(
                 predictions_gcs_source=batch_predict_task.outputs["gcs_output_directory"],
                 ground_truth_format="csv",
                 class_labels=["0", "1", "2"],
-                ground_truth_gcs_source=[f"{BUCKET_URI}/test_ground_truth.csv"]
+                ground_truth_gcs_source=[f"{OUTPUT_DIRECTORY}/{{{{$.pipeline_job_uuid}}}}/data/test_ground_truth.csv"]
             )
     return
     

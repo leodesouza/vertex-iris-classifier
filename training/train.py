@@ -18,6 +18,7 @@ def train():
     args = parser.parse_args()
     RUN_ID = args.run_id    
     gcs_output_path = f"gs://{BUCKET_NAME}/pipelines/iris/runs/{RUN_ID}/model/" 
+    data_path = f"gs://{BUCKET_NAME}/pipelines/iris/runs/{RUN_ID}/data/"
     
     
     
@@ -58,9 +59,24 @@ def train():
         model_blob = bucket.blob(f"{blob_prefix}model.joblib")
         model_blob.upload_from_filename(local_model_path)
         print(f"Modelo enviado para: {gcs_output_path}model.joblib")  
+                                        
         
-        bucket.blob(f"test_no_target.csv").upload_from_filename("outputs/test_no_target.csv")
-        bucket.blob(f"test_ground_truth.csv").upload_from_filename("outputs/test_ground_truth.csv")          
+    # 5 dataset
+    
+     # Extrair bucket e prefixo
+        path_parts = data_path.replace("gs://", "").split("/")
+        bucket_name = path_parts[0]
+        blob_prefix = "/".join(path_parts[1:])
+        
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+                                
+        # Em vez de salvar na raiz:        
+        bucket.blob(f"{blob_prefix}test_no_target.csv").upload_from_filename("outputs/test_no_target.csv")
+        bucket.blob(f"{blob_prefix}test_ground_truth.csv").upload_from_filename("outputs/test_ground_truth.csv")
+    
+        
+        
 
 if __name__ == "__main__":
     train()
