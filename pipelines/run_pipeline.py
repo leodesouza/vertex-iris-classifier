@@ -33,7 +33,7 @@ def run():
         parameter_values={            
             "project": PROJECT_ID,
             "location": REGION,            
-            "existing_model": False
+            "existing_model": True
         },
         enable_caching=False  # Mantém o cache para economizar tempo/dinheiro em steps que não mudaram
     )

@@ -20,3 +20,9 @@ dist/
 
 # Vertex / pipelines artifacts (nunca versionar)
 pipeline.json
+
+# Python virtual environments
+venv/
+.venv/
+venv-vertex/
+env/
